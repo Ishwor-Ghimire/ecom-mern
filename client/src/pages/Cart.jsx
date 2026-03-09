@@ -42,8 +42,18 @@ const Cart = () => {
     const updateQuantity = async (productId, newQty) => {
         if (newQty < 1) return;
 
+        // Find the current cart item to preserve its plan/price
+        const item = cart.find((i) => i.productId === productId);
+
         try {
-            await api.put("/cart/item", { productId, qty: newQty });
+            await api.put("/cart/item", {
+                productId,
+                qty: newQty,
+                planId: item?.planId,
+                planLabel: item?.planLabel,
+                durationInDays: item?.durationInDays,
+                price: item?.price,
+            });
             await fetchCart();
         } catch (err) {
             alert(err.response?.data?.message || "Failed to update quantity");
