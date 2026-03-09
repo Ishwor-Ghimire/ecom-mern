@@ -21,6 +21,7 @@ export const createProduct = async (req, res) => {
       description,
       price,
       pricingPlans,
+      variants,
       image,
       images,
       category,
@@ -34,9 +35,10 @@ export const createProduct = async (req, res) => {
       features,
     } = req.body;
 
-    // Require either price or pricingPlans
+    // Require either price, pricingPlans, or variants
     const hasPlans = pricingPlans && pricingPlans.length > 0;
-    if (!title || !slug || !description || (!price && !hasPlans)) {
+    const hasVariants = variants && variants.length > 0;
+    if (!title || !slug || !description || (!price && !hasPlans && !hasVariants)) {
       return res.status(400).json({ message: "Required fields missing (title, slug, description, and either price or pricingPlans)" });
     }
 
@@ -84,6 +86,7 @@ export const createProduct = async (req, res) => {
       description,
       price: price || (sanitizedPlans.length > 0 ? sanitizedPlans[0].price : 0),
       pricingPlans: sanitizedPlans,
+      variants: hasVariants ? variants : [],
       images: productImages,
       category: category || "Digital Services",
       brand,
@@ -146,6 +149,7 @@ export const updateProduct = async (req, res) => {
       "description",
       "price",
       "pricingPlans",
+      "variants",
       "image",
       "images",
       "category",
