@@ -98,7 +98,7 @@ const Cart = () => {
                 <p className="text-neutral-600 mb-8 text-center max-w-md">
                     Looks like you haven't added any products yet. Browse our products and find something you love!
                 </p>
-                <Button onClick={() => navigate("/")} size="lg">
+                <Button onClick={() => navigate("/#all-products")} size="lg">
                     Browse Products
                 </Button>
             </div>

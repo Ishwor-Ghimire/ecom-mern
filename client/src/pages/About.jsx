@@ -181,7 +181,7 @@ const About = () => {
                             Join thousands of happy customers enjoying premium products at affordable prices
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <Link to="/">
+                            <Link to="/#all-products">
                                 <Button variant="primary" className="px-8 py-3">
                                     Browse Products
                                 </Button>
