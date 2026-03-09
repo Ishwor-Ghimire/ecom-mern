@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import ScrollToTop from "./components/ScrollToTop";
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -30,6 +31,7 @@ import AdminProductForm from "./pages/AdminProductForm";
 function App() {
   return (
     <>
+      <ScrollToTop />
       <Navbar />
 
       <Routes>
