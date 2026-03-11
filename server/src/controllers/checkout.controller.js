@@ -1,5 +1,6 @@
 import Cart from "../models/Cart.js";
 import Product from "../models/Product.js";
+import Order from "../models/Order.js";
 
 export const getCheckoutSummary = async (req, res) => {
   try {
@@ -14,13 +15,23 @@ export const getCheckoutSummary = async (req, res) => {
 
     for (const ci of cart.items) {
       const p = await Product.findById(ci.product).select(
-        "title slug price images tags requiredFields"
+        "title slug price images tags requiredFields pricingPlans"
       );
 
       if (!p) continue;
 
       const qty = Math.max(1, Number(ci.qty || 1));
-      itemsPrice += p.price * qty;
+
+      // Use cart item price (selected plan) or find from pricingPlans or fallback to product.price
+      let itemPrice = ci.price;
+      if (!itemPrice && ci.planId && p.pricingPlans?.length > 0) {
+        const plan = p.pricingPlans.find((pl) => pl.planId === ci.planId);
+        itemPrice = plan?.price || p.price || 0;
+      } else if (!itemPrice) {
+        itemPrice = p.price || 0;
+      }
+
+      itemsPrice += itemPrice * qty;
 
       if (Array.isArray(p.requiredFields)) {
         for (const f of p.requiredFields) requiredSet.add(f);
@@ -30,11 +41,13 @@ export const getCheckoutSummary = async (req, res) => {
         productId: p._id,
         title: p.title,
         slug: p.slug,
-        price: p.price,
-        image: p.images?.[0] || "", // Include first image for display
+        price: itemPrice,
+        image: p.images?.[0] || "",
         qty,
         tags: p.tags || [],
         requiredFields: p.requiredFields || [],
+        planId: ci.planId,
+        planLabel: ci.planLabel,
       });
     }
 
@@ -51,7 +64,7 @@ export const getCheckoutSummary = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-import Order from "../models/Order.js";
+
 
 export const getWhatsAppLinkForOrder = async (req, res) => {
   try {
@@ -105,7 +118,7 @@ export const getWhatsAppLinkForOrder = async (req, res) => {
     const encoded = encodeURIComponent(message);
 
     // 🔁 Your WhatsApp number (Nepal, no +, no spaces)
-    const WHATSAPP_NUMBER = "9779827133449";
+    const WHATSAPP_NUMBER = process.env.WHATSAPP_NUMBER || "9779827133449";
 
     const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encoded}`;
 

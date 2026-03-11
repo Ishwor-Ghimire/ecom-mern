@@ -63,6 +63,11 @@ const ProductCard = ({ product }) => {
                         <span className="text-3xl font-black bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">
                             Rs {price.toLocaleString()}
                         </span>
+                        {product.purchaseCount > 0 && (
+                            <span className="text-xs text-neutral-500 font-medium">
+                                • {product.purchaseCount.toLocaleString()} sold
+                            </span>
+                        )}
                     </div>
 
                     {/* Tags */}

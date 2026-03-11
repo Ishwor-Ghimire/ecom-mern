@@ -73,12 +73,6 @@ export const login = async (req, res) => {
   }
 };
 
-// GET /api/auth/me  (protected later)
-export const me = async (req, res) => {
-  res.json(req.user);
-
-
-};
 
 // GET /api/auth/me
 export const getMe = async (req, res) => {

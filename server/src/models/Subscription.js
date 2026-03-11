@@ -22,6 +22,10 @@ const subscriptionSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        productSlug: {
+            type: String,
+            default: "",
+        },
         productImage: {
             type: String,
             default: "",

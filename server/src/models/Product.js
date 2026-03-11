@@ -100,6 +100,10 @@ const productSchema = new mongoose.Schema(
       type: [String],
       default: [], // e.g. ["email"] or ["phone","uid"]
     },
+    deliveryTime: {
+      type: String,
+      default: "1-6 hours", // e.g. "Instant", "1-6 hours", "24 hours"
+    },
     features: {
       instant: {
         type: Boolean,
@@ -120,6 +124,11 @@ const productSchema = new mongoose.Schema(
     },
     originalPrice: {
       type: Number,
+      min: 0,
+    },
+    purchaseCount: {
+      type: Number,
+      default: 0,
       min: 0,
     },
   },

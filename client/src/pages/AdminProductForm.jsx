@@ -28,6 +28,7 @@ const AdminProductForm = () => {
     isFeatured: false,
     isHotDeal: false,
     originalPrice: "",
+    deliveryTime: "1-6 hours",
   });
 
   // Pricing plans state
@@ -81,6 +82,7 @@ const AdminProductForm = () => {
           isFeatured: data.isFeatured || false,
           isHotDeal: data.isHotDeal || false,
           originalPrice: data.originalPrice || "",
+          deliveryTime: data.deliveryTime || "1-6 hours",
         });
 
         // Load pricing plans or variants
@@ -132,7 +134,7 @@ const AdminProductForm = () => {
   const updatePlan = (planId, field, value) => {
     setPricingPlans(
       pricingPlans.map((p) =>
-        p.planId === panId ? { ...p, [field]: value } : p
+        p.planId === planId ? { ...p, [field]: value } : p
       )
     );
   };
@@ -844,6 +846,19 @@ const AdminProductForm = () => {
                     </label>
                   ))}
                 </div>
+              </div>
+
+              {/* Delivery Time */}
+              <div className="bg-neutral-50 p-4 rounded-lg border border-neutral-200">
+                <h4 className="font-medium text-neutral-900 mb-3">🚀 Delivery Time</h4>
+                <input
+                  type="text"
+                  placeholder="e.g. 1-6 hours, Instant, 24 hours"
+                  value={form.deliveryTime}
+                  onChange={(e) => setForm({ ...form, deliveryTime: e.target.value })}
+                  className="input"
+                />
+                <p className="text-xs text-neutral-500 mt-1">Displayed on the product page as "Manual activation within X after payment verification"</p>
               </div>
             </div>
           </div>

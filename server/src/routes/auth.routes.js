@@ -1,6 +1,5 @@
 import express from "express";
-import { register, login, me, googleAuth, googleAuthCallback } from "../controllers/auth.controller.js";
-import { getMe } from "../controllers/auth.controller.js";
+import { register, login, getMe, googleAuth, googleAuthCallback } from "../controllers/auth.controller.js";
 import { protect } from "../middleware/auth.js";
 
 

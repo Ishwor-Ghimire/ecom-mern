@@ -33,6 +33,7 @@ export const createProduct = async (req, res) => {
       isHotDeal,
       originalPrice,
       features,
+      deliveryTime,
     } = req.body;
 
     // Require either price, pricingPlans, or variants
@@ -64,20 +65,33 @@ export const createProduct = async (req, res) => {
     }
 
     // Validate and sanitize pricing plans
+    const validPlanIds = ["monthly", "3months", "6months", "yearly"];
+    const sanitizePlan = (p) => ({
+      planId: p.planId,
+      label: p.label || p.planId,
+      durationInDays: p.durationInDays || 30,
+      price: Number(p.price),
+      originalPrice: p.originalPrice ? Number(p.originalPrice) : undefined,
+      isRecommended: Boolean(p.isRecommended),
+      isActive: p.isActive !== false,
+    });
+
     let sanitizedPlans = [];
     if (hasPlans) {
-      const validPlanIds = ["monthly", "3months", "6months", "yearly"];
       sanitizedPlans = pricingPlans
         .filter((p) => validPlanIds.includes(p.planId) && p.price > 0)
-        .map((p) => ({
-          planId: p.planId,
-          label: p.label || p.planId,
-          durationInDays: p.durationInDays || 30,
-          price: Number(p.price),
-          originalPrice: p.originalPrice ? Number(p.originalPrice) : undefined,
-          isRecommended: Boolean(p.isRecommended),
-          isActive: p.isActive !== false,
-        }));
+        .map(sanitizePlan);
+    }
+
+    // Sanitize variants and their pricing plans
+    let sanitizedVariants = [];
+    if (hasVariants) {
+      sanitizedVariants = variants.map((v) => ({
+        label: v.label,
+        pricingPlans: (v.pricingPlans || [])
+          .filter((p) => validPlanIds.includes(p.planId) && p.price > 0)
+          .map(sanitizePlan),
+      }));
     }
 
     const product = await Product.create({
@@ -86,7 +100,7 @@ export const createProduct = async (req, res) => {
       description,
       price: price || (sanitizedPlans.length > 0 ? sanitizedPlans[0].price : 0),
       pricingPlans: sanitizedPlans,
-      variants: hasVariants ? variants : [],
+      variants: sanitizedVariants,
       images: productImages,
       category: category || "Digital Services",
       brand,
@@ -96,6 +110,7 @@ export const createProduct = async (req, res) => {
       isFeatured: isFeatured || false,
       isHotDeal: isHotDeal || false,
       originalPrice,
+      deliveryTime: deliveryTime || "1-6 hours",
       features: features || { instant: true, verified: true, support: true },
     });
 
@@ -153,6 +168,7 @@ export const updateProduct = async (req, res) => {
       "image",
       "images",
       "category",
+      "deliveryTime",
       "brand",
       "countInStock",
       "isFeatured",
@@ -208,6 +224,25 @@ export const updateProduct = async (req, res) => {
     if (updates.slug) {
       const exists = await Product.findOne({ slug: updates.slug, _id: { $ne: id } });
       if (exists) return res.status(409).json({ message: "Product slug already exists" });
+    }
+
+    // Sanitize variant pricing plans if variants are being updated
+    if (updates.variants && Array.isArray(updates.variants)) {
+      const validPlanIds = ["monthly", "3months", "6months", "yearly"];
+      updates.variants = updates.variants.map((v) => ({
+        label: v.label,
+        pricingPlans: (v.pricingPlans || [])
+          .filter((p) => validPlanIds.includes(p.planId) && p.price > 0)
+          .map((p) => ({
+            planId: p.planId,
+            label: p.label || p.planId,
+            durationInDays: p.durationInDays || 30,
+            price: Number(p.price),
+            originalPrice: p.originalPrice ? Number(p.originalPrice) : undefined,
+            isRecommended: Boolean(p.isRecommended),
+            isActive: p.isActive !== false,
+          })),
+      }));
     }
 
     const product = await Product.findByIdAndUpdate(id, updates, { new: true });

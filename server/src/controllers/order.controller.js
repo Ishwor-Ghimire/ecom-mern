@@ -235,6 +235,8 @@ export const updateOrderPayment = async (req, res) => {
       return res.status(400).json({ message: "Invalid payment method" });
     }
 
+    const wasPreviouslyPaid = order.payment.status === "paid";
+
     order.payment.status = status;
     if (method) order.payment.method = method;
     if (typeof reference === "string") order.payment.reference = reference;
@@ -250,6 +252,16 @@ export const updateOrderPayment = async (req, res) => {
     }
 
     await order.save();
+
+    // Increment purchase count when newly marked as paid
+    if (status === "paid" && !wasPreviouslyPaid) {
+      for (const item of order.orderItems) {
+        await Product.findByIdAndUpdate(item.product, {
+          $inc: { purchaseCount: item.qty },
+        });
+      }
+    }
+
     return res.json(order);
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -302,6 +314,7 @@ const createSubscriptionsFromOrder = async (order) => {
         order: order._id,
         product: item.product,
         productTitle: item.title,
+        productSlug: item.slug || "",
         productImage: item.image || "",
         planId: item.planId || "monthly",
         planLabel: item.planLabel || "1 Month",

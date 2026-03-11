@@ -133,7 +133,6 @@ export const setCartItemQty = async (req, res) => {
       cart.items[idx].planId = planId || cart.items[idx].planId || "monthly";
       cart.items[idx].planLabel = planLabel || cart.items[idx].planLabel || "1 Month";
       cart.items[idx].durationInDays = durationInDays || cart.items[idx].durationInDays || 30;
-      cart.items[idx].durationInDays = durationInDays || cart.items[idx].durationInDays || 30;
       cart.items[idx].price = itemPrice;
       if (req.body.variantLabel) cart.items[idx].variantLabel = req.body.variantLabel;
     } else {
