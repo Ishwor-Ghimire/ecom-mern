@@ -142,7 +142,7 @@ const Contact = () => {
                                         Get instant help from our team. This is the fastest way to reach us!
                                     </p>
                                     <a
-                                        href="https://wa.me/9779800000000"
+                                        href="https://wa.me/9779827133449"
                                         target="_blank"
                                         rel="noreferrer"
                                         className="inline-flex items-center gap-2 bg-white text-green-600 px-6 py-3 rounded-lg font-semibold hover:bg-green-50 transition-colors"

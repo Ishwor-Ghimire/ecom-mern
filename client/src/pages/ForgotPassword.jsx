@@ -40,7 +40,7 @@ const ForgotPassword = () => {
                         to reset your password. We'll verify your identity and help you securely.
                     </p>
                     <a
-                        href="https://wa.me/9779800000000?text=Hi, I need help resetting my password for email: "
+                        href="https://wa.me/9779827133449?text=Hi, I need help resetting my password for email: "
                         target="_blank"
                         rel="noreferrer"
                         className="block mb-4"
@@ -180,7 +180,7 @@ const ForgotPassword = () => {
                             </div>
 
                             <a
-                                href="https://wa.me/9779800000000?text=Hi, I need help with my account"
+                                href="https://wa.me/9779827133449?text=Hi, I need help with my account"
                                 target="_blank"
                                 rel="noreferrer"
                                 className="block"

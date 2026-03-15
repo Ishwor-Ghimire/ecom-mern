@@ -134,8 +134,8 @@ const ProductDetail = () => {
     const currentPrice = selectedPlan?.price || product.price;
 
     return (
-        <div className="min-h-screen bg-neutral-50 py-12">
-            <div className="max-w-7xl mx-auto px-6">
+        <div className="min-h-screen bg-neutral-50 py-6 sm:py-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6">
                 {/* Back Button */}
                 <button
                     onClick={() => navigate("/")}
@@ -147,11 +147,11 @@ const ProductDetail = () => {
                     Back to Products
                 </button>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-12">
                     {/* Product Image + About */}
                     <div className="flex flex-col gap-6">
                         <div className="bg-white rounded-2xl shadow-card overflow-hidden">
-                            <div className="aspect-square bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center p-12">
+                            <div className="aspect-square bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center p-6 sm:p-12">
                                 <img
                                     src={product.images?.[0] || "https://via.placeholder.com/600?text=No+Image"}
                                     alt={product.title}
@@ -181,7 +181,7 @@ const ProductDetail = () => {
                                 ))}
                                 {product.isFeatured && <Badge variant="accent">Featured</Badge>}
                             </div>
-                            <h1 className="text-4xl font-display font-bold text-neutral-900 mb-3">
+                            <h1 className="text-2xl sm:text-4xl font-display font-bold text-neutral-900 mb-3">
                                 {product.title}
                             </h1>
                             {product.purchaseCount > 0 && (
@@ -363,7 +363,7 @@ const ProductDetail = () => {
 
                             {/* WhatsApp Button */}
                             <a
-                                href={`https://wa.me/9779800000000?text=Hi%2C%20I%27m%20interested%20in%20${encodeURIComponent(product.title)}`}
+                                href={`https://wa.me/${product.whatsappNumber || '9779827133449'}?text=Hi%2C%20I%27m%20interested%20in%20${encodeURIComponent(product.title)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl px-6 py-3 transition-colors"

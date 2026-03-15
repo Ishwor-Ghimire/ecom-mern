@@ -29,6 +29,7 @@ const AdminProductForm = () => {
     isHotDeal: false,
     originalPrice: "",
     deliveryTime: "1-6 hours",
+    whatsappNumber: "",
   });
 
   // Pricing plans state
@@ -83,6 +84,7 @@ const AdminProductForm = () => {
           isHotDeal: data.isHotDeal || false,
           originalPrice: data.originalPrice || "",
           deliveryTime: data.deliveryTime || "1-6 hours",
+          whatsappNumber: data.whatsappNumber || "",
         });
 
         // Load pricing plans or variants
@@ -859,6 +861,19 @@ const AdminProductForm = () => {
                   className="input"
                 />
                 <p className="text-xs text-neutral-500 mt-1">Displayed on the product page as "Manual activation within X after payment verification"</p>
+              </div>
+
+              {/* WhatsApp Number */}
+              <div className="bg-neutral-50 p-4 rounded-lg border border-neutral-200">
+                <h4 className="font-medium text-neutral-900 mb-3">📱 WhatsApp Number</h4>
+                <input
+                  type="text"
+                  placeholder="e.g. 9779827133449 (leave empty for default)"
+                  value={form.whatsappNumber}
+                  onChange={(e) => setForm({ ...form, whatsappNumber: e.target.value })}
+                  className="input"
+                />
+                <p className="text-xs text-neutral-500 mt-1">Per-product WhatsApp number. Leave empty to use the default global number.</p>
               </div>
             </div>
           </div>

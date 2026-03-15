@@ -121,7 +121,7 @@ const FAQ = () => {
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <a
-                            href="https://wa.me/9779800000000"
+                            href="https://wa.me/9779827133449"
                             target="_blank"
                             rel="noreferrer"
                         >

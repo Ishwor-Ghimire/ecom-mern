@@ -134,7 +134,7 @@ const Home = () => {
             <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-white rounded-full blur-3xl animate-pulse" style={{ animationDelay: "2s" }} />
           </div>
 
-          <div className="relative max-w-7xl mx-auto px-6 py-16 md:py-24">
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-16 md:py-24">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               {/* Left Column - Content */}
               <div className="space-y-8 animate-fade-in">
@@ -146,30 +146,30 @@ const Home = () => {
                   <span className="text-sm font-semibold text-white">Trusted by 10,000+ Customers in Nepal</span>
                 </div>
 
-                <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-black leading-tight text-white">
+                <h1 className="font-display text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-tight text-white">
                   Premium Digital<br />
                   <span className="text-yellow-400">
                     Products
                   </span>
                 </h1>
 
-                <p className="text-xl md:text-2xl text-white leading-relaxed max-w-xl">
+                <p className="text-base sm:text-xl md:text-2xl text-white leading-relaxed max-w-xl">
                   Get Netflix, Spotify, ChatGPT, Adobe & more at <span className="font-bold text-yellow-400">unbeatable prices</span> in Nepal
                 </p>
 
                 {/* Trust Indicators */}
-                <div className="grid grid-cols-3 gap-4 max-w-lg">
-                  <div className="text-center p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
-                    <div className="text-3xl font-black text-yellow-400">1-6h</div>
-                    <div className="text-sm mt-1 text-white">Quick Activation</div>
+                <div className="grid grid-cols-3 gap-2 sm:gap-4 max-w-lg">
+                  <div className="text-center p-2 sm:p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+                    <div className="text-xl sm:text-3xl font-black text-yellow-400">1-6h</div>
+                    <div className="text-xs sm:text-sm mt-1 text-white">Quick Activation</div>
                   </div>
-                  <div className="text-center p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
-                    <div className="text-3xl font-black text-green-400">24/7</div>
-                    <div className="text-sm mt-1 text-white">WhatsApp Support</div>
+                  <div className="text-center p-2 sm:p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+                    <div className="text-xl sm:text-3xl font-black text-green-400">24/7</div>
+                    <div className="text-xs sm:text-sm mt-1 text-white">WhatsApp Support</div>
                   </div>
-                  <div className="text-center p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
-                    <div className="text-3xl font-black text-blue-400">100%</div>
-                    <div className="text-sm mt-1 text-white">Verified</div>
+                  <div className="text-center p-2 sm:p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+                    <div className="text-xl sm:text-3xl font-black text-blue-400">100%</div>
+                    <div className="text-xs sm:text-sm mt-1 text-white">Verified</div>
                   </div>
                 </div>
 
@@ -188,7 +188,7 @@ const Home = () => {
               </div>
 
               {/* Right Column - Featured Deals Cards */}
-              <div className="relative">
+              <div className="relative hidden lg:block">
                 <div className="space-y-4">
                   <h3 className="text-2xl font-bold mb-6 text-white">🔥 Hottest Deals Right Now</h3>
                   <div className="grid gap-4">
@@ -249,11 +249,11 @@ const Home = () => {
       )}
 
       {/* All Products Section with Sidebar Filters */}
-      <section id="all-products" className="max-w-7xl mx-auto px-6 py-12">
+      <section id="all-products" className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Section Header with Filter Toggle */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-4xl md:text-5xl font-display font-black text-neutral-900 mb-2">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-display font-black text-neutral-900 mb-2">
               {searchQuery ? `Search Results for "${searchQuery}"` : activeTag === "All" ? "All Products" : `${activeTag} Products`}
             </h2>
             <p className="text-xl text-neutral-600">
@@ -444,24 +444,24 @@ const Home = () => {
       </section>
 
       {/* Stats/Trust Section */}
-      <section className="bg-primary-700 text-white py-16">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+      <section className="bg-primary-700 text-white py-10 sm:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 text-center">
             <div>
-              <div className="text-5xl font-black mb-2">10K+</div>
-              <div className="text-white/80">Happy Customers</div>
+              <div className="text-3xl sm:text-5xl font-black mb-2">10K+</div>
+              <div className="text-white/80 text-sm sm:text-base">Happy Customers</div>
             </div>
             <div>
-              <div className="text-5xl font-black mb-2">50+</div>
-              <div className="text-white/80">Premium Services</div>
+              <div className="text-3xl sm:text-5xl font-black mb-2">50+</div>
+              <div className="text-white/80 text-sm sm:text-base">Premium Services</div>
             </div>
             <div>
-              <div className="text-5xl font-black mb-2">24/7</div>
-              <div className="text-white/80">Support Available</div>
+              <div className="text-3xl sm:text-5xl font-black mb-2">24/7</div>
+              <div className="text-white/80 text-sm sm:text-base">Support Available</div>
             </div>
             <div>
-              <div className="text-5xl font-black mb-2">100%</div>
-              <div className="text-white/80">Verified Deals</div>
+              <div className="text-3xl sm:text-5xl font-black mb-2">100%</div>
+              <div className="text-white/80 text-sm sm:text-base">Verified Deals</div>
             </div>
           </div>
         </div>

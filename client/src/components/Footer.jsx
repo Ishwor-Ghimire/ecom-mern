@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 const Footer = () => {
     return (
         <footer className="bg-neutral-900 text-white mt-auto">
-            <div className="max-w-7xl mx-auto px-6 py-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
                     {/* Brand */}
                     <div className="md:col-span-1">
@@ -82,7 +82,7 @@ const Footer = () => {
                         <ul className="space-y-3">
                             <li>
                                 <a
-                                    href="https://wa.me/9779800000000"
+                                    href="https://wa.me/9779827133449"
                                     target="_blank"
                                     rel="noreferrer"
                                     className="flex items-center gap-2 text-neutral-100 hover:text-white transition-colors text-sm"

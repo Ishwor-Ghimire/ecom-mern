@@ -82,11 +82,11 @@ const Checkout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 py-12">
-      <div className="max-w-7xl mx-auto px-6">
+    <div className="min-h-screen bg-neutral-50 py-8 sm:py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-display font-bold text-neutral-900 mb-2">Checkout</h1>
+          <h1 className="text-2xl sm:text-4xl font-display font-bold text-neutral-900 mb-2">Checkout</h1>
           <p className="text-neutral-600">Complete your order and get activated within hours</p>
         </div>
 

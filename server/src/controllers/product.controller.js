@@ -34,6 +34,7 @@ export const createProduct = async (req, res) => {
       originalPrice,
       features,
       deliveryTime,
+      whatsappNumber,
     } = req.body;
 
     // Require either price, pricingPlans, or variants
@@ -112,6 +113,7 @@ export const createProduct = async (req, res) => {
       originalPrice,
       deliveryTime: deliveryTime || "1-6 hours",
       features: features || { instant: true, verified: true, support: true },
+      whatsappNumber: whatsappNumber || "",
     });
 
     res.status(201).json(product);
@@ -177,6 +179,7 @@ export const updateProduct = async (req, res) => {
       "tags",
       "requiredFields",
       "features",
+      "whatsappNumber",
     ];
 
     const updates = {};

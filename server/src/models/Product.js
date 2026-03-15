@@ -131,6 +131,11 @@ const productSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
+    whatsappNumber: {
+      type: String,
+      default: "", // per-product WhatsApp number; empty = use global default from .env
+      trim: true,
+    },
   },
   {
     timestamps: true,
