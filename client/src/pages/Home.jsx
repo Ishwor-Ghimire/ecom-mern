@@ -24,7 +24,8 @@ const Home = () => {
   });
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  const tags = ["All", "AI", "Entertainment", "Education", "VPN", "Productivity", "Cloud Services"];
+  // Derive categories dynamically from actual products
+  const tags = ["All", ...Array.from(new Set(products.flatMap((p) => p.tags || []))).sort()];
 
   useEffect(() => {
     const fetchProducts = async () => {

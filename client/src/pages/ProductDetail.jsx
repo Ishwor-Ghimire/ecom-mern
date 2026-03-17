@@ -72,6 +72,32 @@ const ProductDetail = () => {
         }
     };
 
+    const handleBuyNow = async () => {
+        if (!user) {
+            navigate("/login");
+            return;
+        }
+
+        setAddingToCart(true);
+        try {
+            await api.put("/cart/item", {
+                productId: product._id,
+                qty: quantity,
+                planId: selectedPlan?.planId || "monthly",
+                planLabel: selectedPlan?.label || "1 Month",
+                durationInDays: selectedPlan?.durationInDays || 30,
+                price: selectedPlan?.price || product.price,
+                variantLabel: selectedVariant?.label,
+            });
+            // Go straight to checkout
+            navigate("/checkout");
+        } catch (err) {
+            alert(err.response?.data?.message || "Failed to process Buy Now");
+        } finally {
+            setAddingToCart(false);
+        }
+    };
+
     const getTagVariant = (tag) => {
         const tagLower = tag.toLowerCase();
         if (tagLower === "ai") return "ai";
@@ -181,7 +207,7 @@ const ProductDetail = () => {
                                 ))}
                                 {product.isFeatured && <Badge variant="accent">Featured</Badge>}
                             </div>
-                            <h1 className="text-2xl sm:text-4xl font-display font-bold text-neutral-900 mb-3">
+                            <h1 className="text-2xl sm:text-3xl font-display font-bold text-neutral-900 mb-2 leading-tight">
                                 {product.title}
                             </h1>
                             {product.purchaseCount > 0 && (
@@ -196,9 +222,9 @@ const ProductDetail = () => {
 
                         {/* Variant Selection */}
                         {product.variants && product.variants.length > 0 && (
-                            <div className="mb-8">
-                                <h2 className="text-lg font-semibold text-neutral-900 mb-4">Select Version</h2>
-                                <div className="flex flex-wrap gap-3">
+                            <div className="mb-6">
+                                <h2 className="text-sm font-bold text-neutral-500 uppercase tracking-widest mb-3">Select Version</h2>
+                                <div className="flex flex-wrap gap-2">
                                     {product.variants.map((variant, index) => {
                                         const isSelected = selectedVariant?.label === variant.label;
                                         return (
@@ -211,9 +237,9 @@ const ProductDetail = () => {
                                                     const rec = vPlans.find(p => p.isRecommended);
                                                     setSelectedPlan(rec || vPlans[0] || null);
                                                 }}
-                                                className={`px-6 py-3 rounded-xl border-2 text-sm font-bold transition-all ${isSelected
-                                                    ? "border-primary-600 bg-primary-600 text-white shadow-lg shadow-primary-500/30 transform scale-105"
-                                                    : "border-neutral-200 bg-white text-neutral-700 hover:border-primary-400 hover:bg-neutral-50"
+                                                className={`px-5 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all ${isSelected
+                                                    ? "border-primary-600 bg-primary-50 text-primary-700"
+                                                    : "border-neutral-200 bg-white text-neutral-700 hover:border-primary-300 hover:bg-neutral-50"
                                                     }`}
                                             >
                                                 {variant.label}
@@ -226,9 +252,9 @@ const ProductDetail = () => {
 
                         {/* Plan Selection - Premium UI */}
                         {hasPlans && (
-                            <div className="mb-8">
-                                <h2 className="text-lg font-semibold text-neutral-900 mb-4">Choose your plan</h2>
-                                <div className="grid gap-3">
+                            <div className="mb-6">
+                                <h2 className="text-sm font-bold text-neutral-500 uppercase tracking-widest mb-3">Choose Plan</h2>
+                                <div className="grid gap-2">
                                     {activePlans.map((plan) => {
                                         const savings = calculateSavings(plan);
                                         const isSelected = selectedPlan?.planId === plan.planId;
@@ -239,14 +265,14 @@ const ProductDetail = () => {
                                                 key={plan.planId}
                                                 onClick={() => setSelectedPlan(plan)}
                                                 className={`relative w-full p-4 rounded-xl border-2 text-left transition-all duration-200 ${isSelected
-                                                    ? "border-primary-500 bg-primary-50 shadow-lg shadow-primary-500/20"
+                                                    ? "border-primary-500 bg-primary-50"
                                                     : "border-neutral-200 bg-white hover:border-neutral-300"
-                                                    } ${plan.isRecommended ? "ring-2 ring-green-400 ring-offset-2" : ""}`}
+                                                    } ${plan.isRecommended ? "ring-2 ring-primary-300" : ""}`}
                                             >
                                                 {/* Recommended Badge */}
                                                 {plan.isRecommended && (
-                                                    <div className="absolute -top-3 left-4 px-3 py-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold rounded-full shadow-lg">
-                                                        🔥 BEST VALUE
+                                                    <div className="absolute -top-3 left-4 px-3 py-1 bg-primary-600 text-white text-[10px] font-bold tracking-wider uppercase rounded-full shadow-sm">
+                                                        Recommended
                                                     </div>
                                                 )}
 
@@ -300,7 +326,7 @@ const ProductDetail = () => {
                         )}
 
                         {/* Quantity & Add to Cart */}
-                        <div className="bg-white rounded-xl shadow-card p-6 mb-8">
+                        <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-5 mb-8">
                             {/* Quantity + Total in one row */}
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-3">
@@ -339,26 +365,23 @@ const ProductDetail = () => {
                             </div>
 
                             {/* Add to Cart + Buy Now row */}
-                            <div className="flex gap-3 mb-3">
+                            <div className="flex flex-col sm:flex-row gap-3 mb-3">
                                 <Button
                                     variant="secondary"
-                                    size="lg"
                                     onClick={addToCart}
                                     disabled={addingToCart || product.countInStock === 0}
-                                    className="flex-1"
+                                    className="flex-1 py-3"
                                 >
                                     {addingToCart ? "Adding..." : product.countInStock === 0 ? "Out of Stock" : <span className="flex items-center justify-center gap-2">Add to Cart <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" /></svg></span>}
                                 </Button>
-                                <button
-                                    onClick={() => {
-                                        if (!user) { navigate("/login"); return; }
-                                        navigate("/checkout");
-                                    }}
-                                    disabled={product.countInStock === 0}
-                                    className="flex-1 bg-neutral-900 hover:bg-neutral-700 text-white font-bold rounded-xl px-6 py-3 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                <Button
+                                    variant="primary"
+                                    onClick={handleBuyNow}
+                                    disabled={addingToCart || product.countInStock === 0}
+                                    className="flex-1 py-3 bg-neutral-900 border-neutral-900 hover:bg-neutral-800"
                                 >
-                                    Buy Now
-                                </button>
+                                    {addingToCart ? "Processing..." : "Buy Now"}
+                                </Button>
                             </div>
 
                             {/* WhatsApp Button */}
