@@ -352,39 +352,8 @@ const Home = () => {
                 </div>
               </div>
 
-              {/* Feature Filters */}
-              <div className="space-y-3">
-                <h3 className="text-sm font-bold text-neutral-900 uppercase tracking-wide">Features</h3>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 cursor-pointer group">
-                    <input
-                      type="checkbox"
-                      checked={featureFilters.instant}
-                      onChange={(e) => setFeatureFilters({ ...featureFilters, instant: e.target.checked })}
-                      className="w-4 h-4 text-green-500 border-neutral-300 rounded focus:ring-2 focus:ring-green-500"
-                    />
-                    <span className="text-sm text-neutral-700 group-hover:text-neutral-900">⚡ Instant Delivery</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer group">
-                    <input
-                      type="checkbox"
-                      checked={featureFilters.verified}
-                      onChange={(e) => setFeatureFilters({ ...featureFilters, verified: e.target.checked })}
-                      className="w-4 h-4 text-blue-500 border-neutral-300 rounded focus:ring-2 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-neutral-700 group-hover:text-neutral-900">✓ Verified Product</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer group">
-                    <input
-                      type="checkbox"
-                      checked={featureFilters.support}
-                      onChange={(e) => setFeatureFilters({ ...featureFilters, support: e.target.checked })}
-                      className="w-4 h-4 text-purple-500 border-neutral-300 rounded focus:ring-2 focus:ring-purple-500"
-                    />
-                    <span className="text-sm text-neutral-700 group-hover:text-neutral-900">🎧 24/7 Support</span>
-                  </label>
-                </div>
-              </div>
+
+
 
               {/* Clear Filters */}
               {hasActiveFilters && (

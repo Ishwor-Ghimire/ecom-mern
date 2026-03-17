@@ -18,6 +18,7 @@ const ProductDetail = () => {
     const [addingToCart, setAddingToCart] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState(null);
     const [selectedVariant, setSelectedVariant] = useState(null);
+    const [showCartModal, setShowCartModal] = useState(false);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -63,8 +64,7 @@ const ProductDetail = () => {
                 price: selectedPlan?.price || product.price,
                 variantLabel: selectedVariant?.label, // Send variant info if present
             });
-            alert(`Added ${quantity} x ${product.title} ${selectedVariant ? `(${selectedVariant.label})` : ""} (${selectedPlan?.label || "1 Month"}) to cart!`);
-            navigate("/cart");
+            setShowCartModal(true);
         } catch (err) {
             alert(err.response?.data?.message || "Failed to add to cart");
         } finally {
@@ -80,17 +80,23 @@ const ProductDetail = () => {
 
         setAddingToCart(true);
         try {
-            await api.put("/cart/item", {
-                productId: product._id,
-                qty: quantity,
-                planId: selectedPlan?.planId || "monthly",
-                planLabel: selectedPlan?.label || "1 Month",
-                durationInDays: selectedPlan?.durationInDays || 30,
-                price: selectedPlan?.price || product.price,
-                variantLabel: selectedVariant?.label,
+            navigate("/checkout", {
+                state: {
+                    buyNowItem: {
+                        productId: product._id,
+                        title: product.title,
+                        slug: product.slug,
+                        image: product.images?.[0] || "",
+                        qty: quantity,
+                        price: selectedPlan?.price || product.price,
+                        planId: selectedPlan?.planId || "monthly",
+                        planLabel: selectedPlan?.label || "1 Month",
+                        durationInDays: selectedPlan?.durationInDays || 30,
+                        variantLabel: selectedVariant?.label || "",
+                        requiredFields: product.requiredFields || [],
+                    },
+                },
             });
-            // Go straight to checkout
-            navigate("/checkout");
         } catch (err) {
             alert(err.response?.data?.message || "Failed to process Buy Now");
         } finally {
@@ -161,6 +167,71 @@ const ProductDetail = () => {
 
     return (
         <div className="min-h-screen bg-neutral-50 py-6 sm:py-12">
+            {showCartModal && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-950/50 px-4 backdrop-blur-sm"
+                    onClick={() => setShowCartModal(false)}
+                >
+                    <div
+                        className="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="bg-gradient-to-r from-primary-600 via-primary-500 to-primary-400 p-6 text-white">
+                            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20">
+                                <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <h2 className="text-2xl font-display font-bold">Added to cart</h2>
+                            <p className="mt-1 text-sm text-white/90">
+                                Your selection is saved and ready for checkout.
+                            </p>
+                        </div>
+
+                        <div className="p-6">
+                            <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+                                <p className="font-semibold text-neutral-900">{product.title}</p>
+                                <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-neutral-700">
+                                    <span className="rounded-full bg-white px-3 py-1.5 ring-1 ring-neutral-200">
+                                        Qty: {quantity}
+                                    </span>
+                                    {selectedPlan && (
+                                        <span className="rounded-full bg-white px-3 py-1.5 ring-1 ring-neutral-200">
+                                            Plan: {selectedPlan.label}
+                                        </span>
+                                    )}
+                                    {selectedVariant && (
+                                        <span className="rounded-full bg-white px-3 py-1.5 ring-1 ring-neutral-200">
+                                            Variant: {selectedVariant.label}
+                                        </span>
+                                    )}
+                                </div>
+                                <p className="mt-4 text-sm text-neutral-600">
+                                    Total: <span className="font-bold text-primary-600">NPR {(currentPrice * quantity).toLocaleString()}</span>
+                                </p>
+                            </div>
+
+                            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => setShowCartModal(false)}
+                                    className="flex-1 border border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-100"
+                                >
+                                    Continue Shopping
+                                </Button>
+                                <Button
+                                    variant="secondary"
+                                    onClick={() => navigate("/cart")}
+                                    className="flex-1"
+                                >
+                                    View Cart
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="max-w-7xl mx-auto px-4 sm:px-6">
                 {/* Back Button */}
                 <button
@@ -174,39 +245,21 @@ const ProductDetail = () => {
                 </button>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-12">
-                    {/* Product Image + About */}
-                    <div className="flex flex-col gap-6">
-                        <div className="bg-white rounded-2xl shadow-card overflow-hidden">
-                            <div className="aspect-square bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center p-6 sm:p-12">
-                                <img
-                                    src={product.images?.[0] || "https://via.placeholder.com/600?text=No+Image"}
-                                    alt={product.title}
-                                    className="w-full h-full object-contain"
-                                />
-                            </div>
-                        </div>
-
-                        {/* About this product - below image */}
-                        <div className="bg-white rounded-2xl shadow-card p-6">
-                            <h2 className="text-lg font-semibold text-neutral-900 mb-3">About this product</h2>
-                            <p className="text-neutral-700 leading-relaxed">
-                                {product.description || "Premium digital product with instant activation."}
-                            </p>
+                    {/* Product Image — always first */}
+                    <div className="order-1 bg-white rounded-2xl shadow-card overflow-hidden">
+                        <div className="aspect-square bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center p-6 sm:p-12">
+                            <img
+                                src={product.images?.[0] || "https://via.placeholder.com/600?text=No+Image"}
+                                alt={product.title}
+                                className="w-full h-full object-contain"
+                            />
                         </div>
                     </div>
 
-                    {/* Product Info */}
-                    <div>
-                        {/* Title & Tags */}
+                    {/* Product Info (Title + Plans + Buttons) — on mobile: order-2, on desktop: right column */}
+                    <div className="order-2 lg:row-span-2">
+                        {/* Title */}
                         <div className="mb-6">
-                            <div className="flex flex-wrap gap-2 mb-4">
-                                {product.tags?.map((tag) => (
-                                    <Badge key={tag} variant={getTagVariant(tag)}>
-                                        {tag}
-                                    </Badge>
-                                ))}
-                                {product.isFeatured && <Badge variant="accent">Featured</Badge>}
-                            </div>
                             <h1 className="text-2xl sm:text-3xl font-display font-bold text-neutral-900 mb-2 leading-tight">
                                 {product.title}
                             </h1>
@@ -227,12 +280,12 @@ const ProductDetail = () => {
                                 <div className="flex flex-wrap gap-2">
                                     {product.variants.map((variant, index) => {
                                         const isSelected = selectedVariant?.label === variant.label;
+                                        const itemWidth = `calc(${100 / product.variants.length}% - ${(product.variants.length - 1) * 0.5 / product.variants.length}rem)`;
                                         return (
                                             <button
                                                 key={index}
                                                 onClick={() => {
                                                     setSelectedVariant(variant);
-                                                    // Reset plan selection for new variant
                                                     const vPlans = variant.pricingPlans?.filter(p => p.isActive !== false) || [];
                                                     const rec = vPlans.find(p => p.isRecommended);
                                                     setSelectedPlan(rec || vPlans[0] || null);
@@ -241,6 +294,7 @@ const ProductDetail = () => {
                                                     ? "border-primary-600 bg-primary-50 text-primary-700"
                                                     : "border-neutral-200 bg-white text-neutral-700 hover:border-primary-300 hover:bg-neutral-50"
                                                     }`}
+                                                style={{ width: itemWidth }}
                                             >
                                                 {variant.label}
                                             </button>
@@ -250,7 +304,7 @@ const ProductDetail = () => {
                             </div>
                         )}
 
-                        {/* Plan Selection - Premium UI */}
+                        {/* Plan Selection */}
                         {hasPlans && (
                             <div className="mb-6">
                                 <h2 className="text-sm font-bold text-neutral-500 uppercase tracking-widest mb-3">Choose Plan</h2>
@@ -269,7 +323,6 @@ const ProductDetail = () => {
                                                     : "border-neutral-200 bg-white hover:border-neutral-300"
                                                     } ${plan.isRecommended ? "ring-2 ring-primary-300" : ""}`}
                                             >
-                                                {/* Recommended Badge */}
                                                 {plan.isRecommended && (
                                                     <div className="absolute -top-3 left-4 px-3 py-1 bg-primary-600 text-white text-[10px] font-bold tracking-wider uppercase rounded-full shadow-sm">
                                                         Recommended
@@ -278,7 +331,6 @@ const ProductDetail = () => {
 
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-4">
-                                                        {/* Radio */}
                                                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? "border-primary-600 bg-primary-600" : "border-neutral-300"
                                                             }`}>
                                                             {isSelected && (
@@ -287,8 +339,6 @@ const ProductDetail = () => {
                                                                 </svg>
                                                             )}
                                                         </div>
-
-                                                        {/* Plan Info */}
                                                         <div>
                                                             <div className="font-bold text-neutral-900 text-lg">
                                                                 {plan.label}
@@ -301,7 +351,6 @@ const ProductDetail = () => {
                                                         </div>
                                                     </div>
 
-                                                    {/* Price & Savings */}
                                                     <div className="text-right">
                                                         {plan.originalPrice && plan.originalPrice > plan.price && (
                                                             <div className="text-sm text-neutral-400 line-through">
@@ -327,7 +376,6 @@ const ProductDetail = () => {
 
                         {/* Quantity & Add to Cart */}
                         <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-5 mb-8">
-                            {/* Quantity + Total in one row */}
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-3">
                                     <label className="text-sm font-medium text-neutral-700">
@@ -364,7 +412,6 @@ const ProductDetail = () => {
                                 </div>
                             </div>
 
-                            {/* Add to Cart + Buy Now row */}
                             <div className="flex flex-col sm:flex-row gap-3 mb-3">
                                 <Button
                                     variant="secondary"
@@ -384,7 +431,6 @@ const ProductDetail = () => {
                                 </Button>
                             </div>
 
-                            {/* WhatsApp Button */}
                             <a
                                 href={`https://wa.me/${product.whatsappNumber || '9779827133449'}?text=Hi%2C%20I%27m%20interested%20in%20${encodeURIComponent(product.title)}`}
                                 target="_blank"
@@ -440,6 +486,29 @@ const ProductDetail = () => {
                             </p>
                             <p className="text-sm text-green-800 mt-1">
                                 ✓ WhatsApp support available
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Tags + About this product — on mobile: order-3 (after buy section), on desktop: left column below image */}
+                    <div className="order-3 flex flex-col gap-4">
+                        {/* Tags */}
+                        {((product.tags && product.tags.length > 0) || product.isFeatured) && (
+                            <div className="flex flex-wrap gap-2">
+                                {product.tags?.map((tag) => (
+                                    <Badge key={tag} variant={getTagVariant(tag)}>
+                                        {tag}
+                                    </Badge>
+                                ))}
+                                {product.isFeatured && <Badge variant="accent">Featured</Badge>}
+                            </div>
+                        )}
+
+                        {/* About this product */}
+                        <div className="bg-white rounded-2xl shadow-card p-6">
+                            <h2 className="text-lg font-semibold text-neutral-900 mb-3">About this product</h2>
+                            <p className="text-neutral-700 leading-relaxed">
+                                {product.description || "Premium digital product with instant activation."}
                             </p>
                         </div>
                     </div>

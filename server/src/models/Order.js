@@ -14,6 +14,7 @@ const orderItemSchema = new mongoose.Schema(
     planId: { type: String, default: "monthly" }, // "monthly", "3months", "yearly"
     planLabel: { type: String, default: "1 Month" }, // Display label
     durationInDays: { type: Number, default: 30 }, // Duration for subscription
+    variantLabel: { type: String, default: "" },
 
     price: { type: Number, required: true, min: 0 },
     qty: { type: Number, required: true, min: 1 },

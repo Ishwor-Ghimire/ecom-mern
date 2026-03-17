@@ -59,6 +59,7 @@ const calculateTotalsFromCart = async (cart) => {
       planId: ci.planId || "monthly",
       planLabel: ci.planLabel || "1 Month",
       durationInDays: ci.durationInDays || 30,
+      variantLabel: ci.variantLabel || "",
     });
 
     itemsPrice += Number(itemPrice) * qty;
@@ -75,11 +76,84 @@ const calculateTotalsFromCart = async (cart) => {
   };
 };
 
+const calculateTotalsFromDirectItems = async (rawItems) => {
+  const items = [];
+  let itemsPrice = 0;
+  const requiredSet = new Set();
+
+  for (const rawItem of rawItems) {
+    if (!rawItem?.productId) continue;
+
+    const p = await Product.findById(rawItem.productId).select(
+      "title slug price images tags countInStock requiredFields pricingPlans variants"
+    );
+
+    if (!p) continue;
+
+    if (Array.isArray(p.requiredFields)) {
+      for (const f of p.requiredFields) requiredSet.add(String(f));
+    }
+
+    let qty = Number(rawItem.qty) || 1;
+    qty = Math.max(1, qty);
+
+    const stock = Number(p.countInStock ?? 0);
+    if (Number.isFinite(stock) && stock > 0) {
+      qty = Math.min(qty, stock);
+    }
+
+    const image =
+      Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : "";
+
+    const variantLabel = rawItem.variantLabel ? String(rawItem.variantLabel) : "";
+    const variant = variantLabel
+      ? p.variants?.find((it) => it.label === variantLabel)
+      : null;
+    const pricingPlans = Array.isArray(variant?.pricingPlans) && variant.pricingPlans.length > 0
+      ? variant.pricingPlans
+      : p.pricingPlans;
+    const activePlans = Array.isArray(pricingPlans)
+      ? pricingPlans.filter((plan) => plan.isActive !== false)
+      : [];
+    const matchedPlan = rawItem.planId
+      ? activePlans.find((plan) => plan.planId === rawItem.planId)
+      : null;
+
+    const resolvedPlan = matchedPlan || activePlans[0] || null;
+    const itemPrice = resolvedPlan?.price ?? p.price ?? 0;
+
+    items.push({
+      product: p._id,
+      title: p.title,
+      slug: p.slug,
+      image,
+      tags: Array.isArray(p.tags) ? p.tags : [],
+      price: itemPrice,
+      qty,
+      planId: resolvedPlan?.planId || rawItem.planId || "monthly",
+      planLabel: resolvedPlan?.label || rawItem.planLabel || "1 Month",
+      durationInDays: resolvedPlan?.durationInDays || rawItem.durationInDays || 30,
+      variantLabel,
+    });
+
+    itemsPrice += Number(itemPrice) * qty;
+  }
+
+  itemsPrice = Number(itemsPrice.toFixed(2));
+
+  return {
+    items,
+    itemsPrice,
+    totalPrice: itemsPrice,
+    requiredFields: Array.from(requiredSet),
+  };
+};
+
 // POST /api/orders
 // Protected - create order from current user's cart
 export const createOrderFromCart = async (req, res) => {
   try {
-    const { activationDetails, activationEmail, notes, paymentMethod } = req.body;
+    const { activationDetails, activationEmail, notes, paymentMethod, items: directItems } = req.body;
 
     // Backward compatibility:
     // If older clients send activationEmail only, convert it to activationDetails.email
@@ -88,13 +162,16 @@ export const createOrderFromCart = async (req, res) => {
         ? activationDetails
         : { email: activationEmail || "" };
 
-    const cart = await Cart.findOne({ user: req.user._id });
-    if (!cart || !Array.isArray(cart.items) || cart.items.length === 0) {
+    const hasDirectItems = Array.isArray(directItems) && directItems.length > 0;
+    const cart = hasDirectItems ? null : await Cart.findOne({ user: req.user._id });
+
+    if (!hasDirectItems && (!cart || !Array.isArray(cart.items) || cart.items.length === 0)) {
       return res.status(400).json({ message: "Cart is empty" });
     }
 
-    const { items, itemsPrice, totalPrice, requiredFields } =
-      await calculateTotalsFromCart(cart);
+    const { items, itemsPrice, totalPrice, requiredFields } = hasDirectItems
+      ? await calculateTotalsFromDirectItems(directItems)
+      : await calculateTotalsFromCart(cart);
 
     if (items.length === 0) {
       return res.status(400).json({ message: "No valid items to order" });
@@ -170,9 +247,10 @@ export const createOrderFromCart = async (req, res) => {
       }
     }
 
-    // Clear cart after order creation
-    cart.items = [];
-    await cart.save();
+    if (cart) {
+      cart.items = [];
+      await cart.save();
+    }
 
     return res.status(201).json(order);
   } catch (error) {

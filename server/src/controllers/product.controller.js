@@ -1,5 +1,31 @@
 import Product from "../models/Product.js";
 
+const sanitizePlan = (plan) => {
+  const durationInDays = Number(plan?.durationInDays);
+  const price = Number(plan?.price);
+  const planId = String(plan?.planId || "").trim();
+  const label = String(plan?.label || "").trim();
+
+  if (!planId || !label || !Number.isFinite(durationInDays) || durationInDays < 1 || !Number.isFinite(price) || price <= 0) {
+    return null;
+  }
+
+  const originalPrice = Number(plan?.originalPrice);
+
+  return {
+    planId,
+    label,
+    durationInDays: Math.round(durationInDays),
+    price,
+    originalPrice: Number.isFinite(originalPrice) && originalPrice > 0 ? originalPrice : undefined,
+    isRecommended: Boolean(plan?.isRecommended),
+    isActive: plan?.isActive !== false,
+  };
+};
+
+const sanitizePlans = (plans = []) =>
+  plans.map(sanitizePlan).filter(Boolean);
+
 // GET /api/products
 // Public – list all products
 export const getProducts = async (req, res) => {
@@ -65,34 +91,18 @@ export const createProduct = async (req, res) => {
       }
     }
 
-    // Validate and sanitize pricing plans
-    const validPlanIds = ["monthly", "3months", "6months", "yearly"];
-    const sanitizePlan = (p) => ({
-      planId: p.planId,
-      label: p.label || p.planId,
-      durationInDays: p.durationInDays || 30,
-      price: Number(p.price),
-      originalPrice: p.originalPrice ? Number(p.originalPrice) : undefined,
-      isRecommended: Boolean(p.isRecommended),
-      isActive: p.isActive !== false,
-    });
-
     let sanitizedPlans = [];
     if (hasPlans) {
-      sanitizedPlans = pricingPlans
-        .filter((p) => validPlanIds.includes(p.planId) && p.price > 0)
-        .map(sanitizePlan);
+      sanitizedPlans = sanitizePlans(pricingPlans);
     }
 
     // Sanitize variants and their pricing plans
     let sanitizedVariants = [];
     if (hasVariants) {
       sanitizedVariants = variants.map((v) => ({
-        label: v.label,
-        pricingPlans: (v.pricingPlans || [])
-          .filter((p) => validPlanIds.includes(p.planId) && p.price > 0)
-          .map(sanitizePlan),
-      }));
+        label: String(v.label || "").trim(),
+        pricingPlans: sanitizePlans(v.pricingPlans || []),
+      })).filter((v) => v.label);
     }
 
     const product = await Product.create({
@@ -230,22 +240,15 @@ export const updateProduct = async (req, res) => {
     }
 
     // Sanitize variant pricing plans if variants are being updated
+    if (updates.pricingPlans && Array.isArray(updates.pricingPlans)) {
+      updates.pricingPlans = sanitizePlans(updates.pricingPlans);
+    }
+
     if (updates.variants && Array.isArray(updates.variants)) {
-      const validPlanIds = ["monthly", "3months", "6months", "yearly"];
       updates.variants = updates.variants.map((v) => ({
-        label: v.label,
-        pricingPlans: (v.pricingPlans || [])
-          .filter((p) => validPlanIds.includes(p.planId) && p.price > 0)
-          .map((p) => ({
-            planId: p.planId,
-            label: p.label || p.planId,
-            durationInDays: p.durationInDays || 30,
-            price: Number(p.price),
-            originalPrice: p.originalPrice ? Number(p.originalPrice) : undefined,
-            isRecommended: Boolean(p.isRecommended),
-            isActive: p.isActive !== false,
-          })),
-      }));
+        label: String(v.label || "").trim(),
+        pricingPlans: sanitizePlans(v.pricingPlans || []),
+      })).filter((v) => v.label);
     }
 
     const product = await Product.findByIdAndUpdate(id, updates, { new: true });

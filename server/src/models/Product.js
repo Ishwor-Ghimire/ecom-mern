@@ -6,7 +6,7 @@ const pricingPlanSchema = new mongoose.Schema(
     planId: {
       type: String,
       required: true,
-      enum: ["monthly", "3months", "6months", "yearly"],
+      trim: true,
     },
     label: {
       type: String,
@@ -160,4 +160,3 @@ productSchema.set("toObject", { virtuals: true });
 const Product = mongoose.model("Product", productSchema);
 
 export default Product;
-

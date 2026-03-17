@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import Button from "../components/Button";
 import LoadingSpinner from "../components/LoadingSpinner";
 
 const Checkout = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const buyNowItem = location.state?.buyNowItem || null;
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -24,6 +26,14 @@ const Checkout = () => {
 
   // Load checkout summary
   useEffect(() => {
+    if (buyNowItem) {
+      setItems([buyNowItem]);
+      setRequiredFields(buyNowItem.requiredFields || []);
+      setTotalPrice((buyNowItem.price || 0) * (buyNowItem.qty || 1));
+      setLoading(false);
+      return;
+    }
+
     const fetchSummary = async () => {
       try {
         const { data } = await api.get("/checkout/summary");
@@ -38,7 +48,7 @@ const Checkout = () => {
     };
 
     fetchSummary();
-  }, []);
+  }, [buyNowItem]);
 
   const handleChange = (field, value) => {
     setActivationDetails((prev) => ({ ...prev, [field]: value }));
@@ -50,10 +60,25 @@ const Checkout = () => {
     setPlacing(true);
 
     try {
-      const { data } = await api.post("/orders", {
+      const payload = {
         activationDetails,
         paymentMethod: "esewa_qr",
-      });
+      };
+
+      if (buyNowItem) {
+        payload.items = [
+          {
+            productId: buyNowItem.productId,
+            qty: buyNowItem.qty,
+            planId: buyNowItem.planId,
+            planLabel: buyNowItem.planLabel,
+            durationInDays: buyNowItem.durationInDays,
+            variantLabel: buyNowItem.variantLabel,
+          },
+        ];
+      }
+
+      const { data } = await api.post("/orders", payload);
 
       navigate(`/order-success/${data._id}`);
     } catch (err) {
@@ -73,10 +98,12 @@ const Checkout = () => {
 
   if (error && items.length === 0) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-4">
-        <div className="text-red-500 text-6xl mb-4">⚠️</div>
-        <p className="text-red-600 text-lg mb-6">{error}</p>
-        <Button onClick={() => navigate("/cart")}>Back to Cart</Button>
+        <div className="min-h-screen flex flex-col items-center justify-center px-4">
+          <div className="text-red-500 text-6xl mb-4">⚠️</div>
+          <p className="text-red-600 text-lg mb-6">{error}</p>
+        <Button onClick={() => navigate(buyNowItem ? "/" : "/cart")}>
+          {buyNowItem ? "Back to Home" : "Back to Cart"}
+        </Button>
       </div>
     );
   }
@@ -224,6 +251,16 @@ const Checkout = () => {
                         <p className="text-xs text-neutral-600 mt-1">
                           Qty: {item.qty} × NPR {item.price.toLocaleString()}
                         </p>
+                        {item.variantLabel && (
+                          <p className="text-xs text-neutral-600 mt-1">
+                            Variant: {item.variantLabel}
+                          </p>
+                        )}
+                        {item.planLabel && (
+                          <p className="text-xs text-neutral-600 mt-1">
+                            Plan: {item.planLabel}
+                          </p>
+                        )}
                         <p className="text-sm font-semibold text-primary-600 mt-1">
                           NPR {(item.price * item.qty).toLocaleString()}
                         </p>
@@ -288,4 +325,3 @@ const Checkout = () => {
 };
 
 export default Checkout;
-

@@ -12,6 +12,16 @@ const PLAN_TEMPLATES = {
   yearly: { planId: "yearly", label: "1 Year", durationInDays: 365 },
 };
 
+const createCustomPlan = () => ({
+  planId: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+  label: "Custom Plan",
+  durationInDays: 7,
+  price: "",
+  originalPrice: "",
+  isRecommended: false,
+  isActive: true,
+});
+
 const AdminProductForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -127,6 +137,10 @@ const AdminProductForm = () => {
     ]);
   };
 
+  const addCustomPlan = () => {
+    setPricingPlans([...pricingPlans, createCustomPlan()]);
+  };
+
   // Remove a pricing plan
   const removePlan = (planId) => {
     setPricingPlans(pricingPlans.filter((p) => p.planId !== planId));
@@ -181,6 +195,13 @@ const AdminProductForm = () => {
       ...currentPlans,
       { ...template, price: "", originalPrice: "", isRecommended: false, isActive: true }
     ];
+    setVariants(newVariants);
+  };
+
+  const addCustomPlanToVariant = (variantIndex) => {
+    const newVariants = [...variants];
+    const currentPlans = newVariants[variantIndex].pricingPlans || [];
+    newVariants[variantIndex].pricingPlans = [...currentPlans, createCustomPlan()];
     setVariants(newVariants);
   };
 
@@ -583,6 +604,13 @@ const AdminProductForm = () => {
                             + {PLAN_TEMPLATES[planId].label}
                           </button>
                         ))}
+                        <button
+                          type="button"
+                          onClick={() => addCustomPlanToVariant(vIndex)}
+                          className="px-2 py-1 text-xs bg-primary-50 border border-primary-200 text-primary-700 rounded hover:bg-primary-100 transition-colors"
+                        >
+                          + Custom Plan
+                        </button>
                       </div>
 
                       <div className="space-y-3">
@@ -592,7 +620,26 @@ const AdminProductForm = () => {
                               <span className="font-bold text-sm text-neutral-700">{plan.label}</span>
                               <button type="button" onClick={() => removePlanFromVariant(vIndex, plan.planId)} className="text-red-400 hover:text-red-600 text-xs">✕</button>
                             </div>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+                              <div className="col-span-2 md:col-span-1">
+                                <label className="block text-[10px] text-neutral-500">Label</label>
+                                <input
+                                  type="text"
+                                  value={plan.label}
+                                  onChange={(e) => updateVariantPlan(vIndex, plan.planId, "label", e.target.value)}
+                                  className="input py-1 text-sm bg-neutral-50"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] text-neutral-500">Days</label>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  value={plan.durationInDays}
+                                  onChange={(e) => updateVariantPlan(vIndex, plan.planId, "durationInDays", e.target.value)}
+                                  className="input py-1 text-sm bg-neutral-50"
+                                />
+                              </div>
                               <div>
                                 <label className="block text-[10px] text-neutral-500">Price</label>
                                 <input type="number" value={plan.price} onChange={(e) => updateVariantPlan(vIndex, plan.planId, 'price', e.target.value)} className="input py-1 text-sm bg-neutral-50" />
@@ -646,21 +693,30 @@ const AdminProductForm = () => {
               /* Multiple Pricing Plans Mode */
               <div className="space-y-4">
                 {/* Add Plan Buttons */}
-                {availablePlansToAdd.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="text-sm text-neutral-500">Add plan:</span>
-                    {availablePlansToAdd.map((planId) => (
-                      <button
-                        key={planId}
-                        type="button"
-                        onClick={() => addPlan(planId)}
-                        className="px-3 py-1 text-sm bg-primary-50 text-primary-700 rounded-full hover:bg-primary-100 transition-colors"
-                      >
-                        + {PLAN_TEMPLATES[planId].label}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <span className="text-sm text-neutral-500">Add plan:</span>
+                  {availablePlansToAdd.map((planId) => (
+                    <button
+                      key={planId}
+                      type="button"
+                      onClick={() => addPlan(planId)}
+                      className="px-3 py-1 text-sm bg-primary-50 text-primary-700 rounded-full hover:bg-primary-100 transition-colors"
+                    >
+                      + {PLAN_TEMPLATES[planId].label}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={addCustomPlan}
+                    className="px-3 py-1 text-sm bg-neutral-900 text-white rounded-full hover:bg-neutral-800 transition-colors"
+                  >
+                    + Custom Plan
+                  </button>
+                </div>
+
+                <div className="rounded-xl border border-primary-200 bg-primary-50 p-4 text-sm text-primary-900">
+                  Set the plan duration in days. The activation email expiry date is calculated from the actual activation date plus this duration.
+                </div>
 
                 {pricingPlans.length === 0 ? (
                   <div className="text-center py-8 text-neutral-500 bg-neutral-50 rounded-lg border-2 border-dashed border-neutral-200">
@@ -695,20 +751,35 @@ const AdminProductForm = () => {
                           </button>
                         </div>
 
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                          <div className="col-span-2 md:col-span-1">
+                            <label className="block text-xs font-medium text-neutral-600 mb-1">Label</label>
+                            <input
+                              type="text"
+                              value={plan.label}
+                              onChange={(e) => updatePlan(plan.planId, "label", e.target.value)}
+                              required
+                              className="input"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-neutral-600 mb-1">Days</label>
+                            <input
+                              type="number"
+                              min="1"
+                              value={plan.durationInDays}
+                              onChange={(e) => updatePlan(plan.planId, "durationInDays", e.target.value)}
+                              required
+                              className="input"
+                            />
+                          </div>
                           <div>
                             <label className="block text-xs font-medium text-neutral-600 mb-1">Price (NPR)</label>
                             <input
                               type="number"
                               placeholder="0"
                               value={plan.price}
-                              onChange={(e) =>
-                                setPricingPlans(
-                                  pricingPlans.map((p) =>
-                                    p.planId === plan.planId ? { ...p, price: e.target.value } : p
-                                  )
-                                )
-                              }
+                              onChange={(e) => updatePlan(plan.planId, "price", e.target.value)}
                               required
                               className="input text-lg font-bold"
                             />
@@ -719,13 +790,7 @@ const AdminProductForm = () => {
                               type="number"
                               placeholder="Optional"
                               value={plan.originalPrice || ""}
-                              onChange={(e) =>
-                                setPricingPlans(
-                                  pricingPlans.map((p) =>
-                                    p.planId === plan.planId ? { ...p, originalPrice: e.target.value } : p
-                                  )
-                                )
-                              }
+                              onChange={(e) => updatePlan(plan.planId, "originalPrice", e.target.value)}
                               className="input"
                             />
                           </div>
@@ -745,13 +810,7 @@ const AdminProductForm = () => {
                               <input
                                 type="checkbox"
                                 checked={plan.isActive !== false}
-                                onChange={(e) =>
-                                  setPricingPlans(
-                                    pricingPlans.map((p) =>
-                                      p.planId === plan.planId ? { ...p, isActive: e.target.checked } : p
-                                    )
-                                  )
-                                }
+                                onChange={(e) => updatePlan(plan.planId, "isActive", e.target.checked)}
                                 className="w-4 h-4 text-primary-600"
                               />
                               <span className="text-sm">Active</span>
